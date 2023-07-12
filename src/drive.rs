@@ -2,10 +2,10 @@ use std::path::Path;
 use color_eyre::eyre::Error;
 use crate::auth::GToken;
 use color_eyre::Result;
-use reqwest::Client;
+use reqwest::{Body, Client};
 use reqwest::multipart::{Form, Part};
 use serde::{Deserialize, Serialize};
-use tokio::io::AsyncReadExt;
+use tokio_util::codec::{BytesCodec, FramedRead};
 
 pub struct GFile {
     pub id: String,
@@ -46,9 +46,9 @@ impl GFile {
             team_drive_id,
         })?;
 
-        let mut file = tokio::fs::File::open(file).await?;
-        let mut file_contents = Vec::new();
-        file.read_to_end(&mut file_contents).await?;
+        let file = tokio::fs::File::open(file).await?;
+        let stream = FramedRead::new(file, BytesCodec::new());
+        let body = Body::wrap_stream(stream);
 
         let multipart = Form::new()
             .part(
@@ -58,7 +58,7 @@ impl GFile {
             )
             .part(
                 "media",
-                Part::bytes(file_contents)
+                Part::stream(body)
                         .mime_str(MIME_TYPE)?
             );
 
