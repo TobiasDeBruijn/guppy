@@ -1,11 +1,13 @@
 use std::path::Path;
+use futures_util::StreamExt;
 use color_eyre::eyre::Error;
 use crate::auth::GToken;
 use color_eyre::Result;
+use indicatif::ProgressBar;
 use reqwest::{Body, Client};
 use reqwest::multipart::{Form, Part};
 use serde::{Deserialize, Serialize};
-use tokio_util::codec::{BytesCodec, FramedRead};
+use tokio_util::io::ReaderStream;
 
 pub struct GFile {
     pub id: String,
@@ -47,8 +49,28 @@ impl GFile {
         })?;
 
         let file = tokio::fs::File::open(file).await?;
-        let stream = FramedRead::new(file, BytesCodec::new());
-        let body = Body::wrap_stream(stream);
+        let total_size = file.metadata().await?.len();
+        let mut already_uploaded = 0;
+
+        let progress_bar = ProgressBar::new(total_size);
+
+        let mut reader_stream = ReaderStream::new(file);
+        let async_stream = async_stream::stream! {
+            while let Some(chunk) = reader_stream.next().await {
+                if let Ok(chunk) = &chunk {
+                    let new = u64::min(already_uploaded + (chunk.len() as u64), total_size);
+                    already_uploaded = new;
+                    progress_bar.set_position(new);
+                    if already_uploaded >= total_size {
+                        progress_bar.finish();
+                    }
+                }
+
+                yield chunk;
+             }
+        };
+
+        let body = Body::wrap_stream(async_stream);
 
         let multipart = Form::new()
             .part(
