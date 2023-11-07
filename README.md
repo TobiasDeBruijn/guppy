@@ -11,7 +11,7 @@ Simple tool to upload files to Google Drive using a service account
     3. Paste the result in a text file.
 4. Launch guppy:
 ```
-guppy --pem <Path to the text file> --email <value of `client_email`> --folder <Optional folder ID> --team-drive <Optional Team Drive ID> <File>
+guppy --pem <Path to the text file> --email <value of `client_email`> upload --folder <Optional folder ID> --team-drive <Optional Team Drive ID> <File>
 ```
 
 # License

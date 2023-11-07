@@ -48,7 +48,8 @@ impl GToken {
         let key_pair = RS256KeyPair::from_pem(&service_account.private_key_pem)
             .map_err(|e| Error::msg(format!("Failed to create key pair: {e}")))?;
 
-        let jwt = key_pair.sign(claims)
+        let jwt = key_pair
+            .sign(claims)
             .map_err(|e| Error::msg(format!("Failed to sign JWT claims: {e}")))?;
 
         let response: OauthTokenResponse = Client::new()

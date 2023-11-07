@@ -1,16 +1,37 @@
+use clap::{Args, Parser, Subcommand};
 use std::path::PathBuf;
-use clap::Parser;
 
 #[derive(Debug, Parser)]
-pub struct Args {
+pub struct ProgramArgs {
     #[arg(short, long)]
     pub pem: PathBuf,
     #[arg(short, long)]
     pub email: String,
+
+    #[clap(subcommand)]
+    pub subcommand: SubCommand,
+}
+
+#[derive(Debug, Subcommand)]
+pub enum SubCommand {
+    Upload(UploadCommand),
+    Download(DownloadCommand),
+}
+
+#[derive(Debug, Args)]
+pub struct UploadCommand {
+    #[arg(long, short)]
+    pub source: PathBuf,
     #[arg(long, short)]
     pub folder: Option<String>,
     #[arg(long, short)]
     pub team_drive: Option<String>,
+}
 
-    pub file: PathBuf,
+#[derive(Debug, Args)]
+pub struct DownloadCommand {
+    #[arg(long, short)]
+    pub source: String,
+    #[arg(long, short)]
+    pub destination_dir: PathBuf,
 }
