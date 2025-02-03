@@ -25,6 +25,8 @@ jobs:
 
   create-release:
     name: create-release
+    permissions:
+      contents: write
     needs:
       - build-server-musl
     runs-on: ubuntu-latest
