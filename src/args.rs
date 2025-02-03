@@ -7,7 +7,6 @@ pub struct ProgramArgs {
     pub pem: PathBuf,
     #[arg(short, long)]
     pub email: String,
-
     #[clap(subcommand)]
     pub subcommand: SubCommand,
 }
@@ -26,6 +25,10 @@ pub struct UploadCommand {
     pub folder: Option<String>,
     #[arg(long, short)]
     pub team_drive: Option<String>,
+
+    /// Optionally, supply a Discord webhook to be called when an upload is done
+    #[arg(long)]
+    pub success_webhook: Option<String>,
 }
 
 #[derive(Debug, Args)]

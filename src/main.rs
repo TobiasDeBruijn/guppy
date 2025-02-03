@@ -4,6 +4,7 @@ use crate::drive::GFile;
 use clap::Parser;
 use color_eyre::eyre::Error;
 use color_eyre::Result;
+use dwbhk::{EmbedBuilder, EmbedFieldBuilder, WebhookBuilder, WebhookRequestBuilder};
 use tokio::io::AsyncReadExt;
 
 mod args;
@@ -54,6 +55,48 @@ async fn upload(upload: &UploadCommand, token: &GToken) -> Result<()> {
     .await?;
 
     println!("{}", file.id);
+
+    if let Some(webhook) = &upload.success_webhook {
+        let _ = call_upload_webhook(
+            webhook,
+            upload.source.file_name()
+                .map(|fname| fname.to_str().unwrap_or("Invalid UTF-8"))
+                .unwrap_or("Unknown"),
+            &file.id
+        ).await;
+    }
+
+    Ok(())
+}
+
+async fn call_upload_webhook(
+    url: &str,
+    file_name: &str,
+    file_id: &str
+) -> Result<()> {
+    WebhookRequestBuilder::new().set_data(WebhookBuilder::new()
+        .set_embeds(vec![
+            EmbedBuilder::new()
+                .set_title("Guppy upload success")
+                .set_fields(vec![
+                    EmbedFieldBuilder::new()
+                        .set_name("File name")
+                        .set_value(file_name)
+                        .build(),
+                    EmbedFieldBuilder::new()
+                        .set_name("Drive File ID")
+                        .set_value(file_id)
+                        .build()
+                ])
+                .set_color_hex("197052")
+                .build()
+        ])
+        .build()
+    )
+        .build()
+        .execute_url(url)
+        .await?;
+
     Ok(())
 }
 
