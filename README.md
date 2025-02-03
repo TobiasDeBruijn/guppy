@@ -14,5 +14,8 @@ Simple tool to upload files to Google Drive using a service account
 guppy --pem <Path to the text file> --email <value of `client_email`> upload --folder <Optional folder ID> --team-drive <Optional Team Drive ID> <File>
 ```
 
+## Scripts
+I wrap Guppy further with helper scripts, these, and an explanation about how these work, can be found [here](scripts/README.md)
+
 # License
 This project is available under the MIT or Apache 2.0 license, at your option.
