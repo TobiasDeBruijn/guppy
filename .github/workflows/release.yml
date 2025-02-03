@@ -42,8 +42,10 @@ jobs:
           release_name: Release ${{ github.ref }}
           draft: false
 
+      - run: mv guppy-x86_64-unknown-linux-musl/guppy guppy-x86_64-unknown-linux-musl/guppy-x86_64-unknown-linux-musl
+
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            guppy-x86_64-unknown-linux-musl
+            guppy-x86_64-unknown-linux-musl/guppy-x86_64-unknown-linux-musl
